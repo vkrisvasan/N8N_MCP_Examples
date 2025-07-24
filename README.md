@@ -34,6 +34,8 @@ docker run -it --rm \
 
   step 8: create workflow
 
+  step 9: install https://sqlitebrowser.org/dl/ and use it to connect to the ~/n8n_data/database.sqlite and understand the data
+
   step 9: stop docker
   
   docker stop n8n-mcp
