@@ -39,5 +39,6 @@ docker run -it --rm \
   step 10: stop docker
   
   docker stop n8n-mcp
+  
   docker desktop stop
   
