@@ -23,3 +23,12 @@ docker run -it --rm \
 
   Step 6: To stop Docker Desktop from the command line:
   docker desktop stop
+
+  step 7: create an id with the gmail id or other mechanisms and passwd, i set "Set not for work"
+
+  step 8: create workflow
+
+  step 9: stop docker
+  docker stop n8n-mcp
+  docker desktop stop
+  
