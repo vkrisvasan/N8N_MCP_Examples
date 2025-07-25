@@ -26,6 +26,8 @@ docker run -it --rm \
   
   http://localhost:5678
 
+ 🎯 Step 5.1 : set up n8n API key -- in n8n hosted web page > Go to left bottom > account > settings > n8n API > Create an API key > copy the key
+ 
  🎯 Step 6: To stop Docker Desktop from the command line:
   
   docker desktop stop
