@@ -1,8 +1,6 @@
 # N8N_MCP_Examples
 
-step 1:
-
-Installed docker desktop for the system with common developer settings. Updated CLI from the settings > software update
+step 1: Installed docker desktop for the system with common developer settings. Updated CLI from the settings > software update
 
 step 2: Open command prompt and create a directory To keep your n8n workflows and settings even if you restart or upgrade the container:
 
