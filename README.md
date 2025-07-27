@@ -30,15 +30,21 @@ docker run -it --rm \
   
   http://localhost:5678
 
- 🎯 Step 5.1 : set up n8n API key -- in n8n hosted web page > Go to left bottom > account > settings > n8n API > Create an API key > copy the key
+ 🎯 Step 5.1 : create an id with the gmail id or other mechanisms and passwd, i set "Set not for work" 
+ 
+ 🎯 Step 5.2 : set up n8n API key -- in n8n hosted web page > Go to left bottom > account > settings > n8n API > Create an API key > copy the key
 
- 🎯 step 6: create an id with the gmail id or other mechanisms and passwd, i set "Set not for work"
+ 🎯 step 6: Install Cursor IDE and use latest Claude model. Claude desktop is the best to generate n8n workflow using n8n-mcp using Claude Opus 4 with extended thinking. i did not use claude desktop and i used cursor ide
 
- 🎯 step 7: create workflow
+ 🎯 step 6.1: https://github.com/czlonkowski/n8n-mcp/blob/main/docs/CURSOR_SETUP.md helps with cursor IDE connect to n8n MCP
+
+ 🎯 step 6.2: Sample prompt to generate the json file "build n8n workflow and provide the json file to 1. read the business requirement from a google excel sheet 2. edit the google excel sheet to update the requirement sheet with dod, dor, acceptance criteria, clear functional specs, non functional specs, estimation in story points 3. generate the source code in python for the requirement as detailed in point 2 following clean coding practices, SOLID design principles, Test driven development approach, defensive programming paradigm, logging following open telemetry and the code has to be idiomatic in nature 4. create a repo and raise PR in git  5. run static code checks on the branch as in point 4 and create another branch with modified code  with 0 code smells, code bugs, less than 3% duplicate line density , greater than 80% code coverage , 0 code vulnerabilities"
+
+ 🎯 step 7: create workflow in n8n http://localhost:5678 by "Create Workflow" > "Import from file" and import the json generated from cursor IDE. Save the flow and continue to mature the flow by running it and changiung it. Refer AutomatedBacklogRefinement branch within the repo for details. 
 
  🎯 step 8: install https://sqlitebrowser.org/dl/ and use it to connect to the ~/n8n_data/database.sqlite and understand the data
 
- 🎯 Step 6: To stop n8n-mcp running within Docker Desktop from the command line:
+ 🎯 Step 9: To stop n8n-mcp running within Docker Desktop from the command line:
   
 docker stop n8n-mcp
   
