@@ -11,6 +11,10 @@ mkdir -p ~/n8n_data
 
 docker desktop restart
 
+🎯 step 3.1: Pull the latest Docker image (~280MB, no n8n dependencies!)
+
+docker pull ghcr.io/czlonkowski/n8n-mcp:latest
+
 🎯 step 4: in command prompt The following command pulls the official n8n image and runs it with recommended environment variables for MCP:
 
 docker run -it --rm \
@@ -27,20 +31,18 @@ docker run -it --rm \
   http://localhost:5678
 
  🎯 Step 5.1 : set up n8n API key -- in n8n hosted web page > Go to left bottom > account > settings > n8n API > Create an API key > copy the key
- 
- 🎯 Step 6: To stop Docker Desktop from the command line:
+
+ 🎯 step 6: create an id with the gmail id or other mechanisms and passwd, i set "Set not for work"
+
+ 🎯 step 7: create workflow
+
+ 🎯 step 8: install https://sqlitebrowser.org/dl/ and use it to connect to the ~/n8n_data/database.sqlite and understand the data
+
+ 🎯 Step 6: To stop n8n-mcp running within Docker Desktop from the command line:
   
-  docker desktop stop
-
- 🎯 step 7: create an id with the gmail id or other mechanisms and passwd, i set "Set not for work"
-
- 🎯 step 8: create workflow
-
- 🎯 step 9: install https://sqlitebrowser.org/dl/ and use it to connect to the ~/n8n_data/database.sqlite and understand the data
-
+docker stop n8n-mcp
+  
  🎯 step 10: stop docker
-  
- 🎯 docker stop n8n-mcp
-  
- 🎯 docker desktop stop
+
+docker desktop stop
   
