@@ -11,7 +11,7 @@ mkdir -p ~/n8n_data
 
 docker desktop restart
 
-🎯 step 3.1: Pull the latest Docker image (~280MB, no n8n dependencies!)
+🎯 step 3.1: Pull the latest Docker image (~280MB, no n8n dependencies!) -- more details in https://github.com/czlonkowski/n8n-mcp 
 
 docker pull ghcr.io/czlonkowski/n8n-mcp:latest
 
@@ -42,13 +42,15 @@ docker run -it --rm \
 
  🎯 step 7: create workflow in n8n http://localhost:5678 by "Create Workflow" > "Import from file" and import the json generated from cursor IDE. Save the flow and continue to mature the flow by running it and changiung it. Refer AutomatedBacklogRefinement branch within the repo for details. 
 
- 🎯 step 8: install https://sqlitebrowser.org/dl/ and use it to connect to the ~/n8n_data/database.sqlite and understand the data
+ 🎯 step 8: install https://sqlitebrowser.org/dl/ and use it to connect to the ~/n8n_data/database.sqlite and understand the config data
 
- 🎯 Step 9: To stop n8n-mcp running within Docker Desktop from the command line:
+ 🎯 step 8.1: download the workflow as a json file hitting the 3 dots near the save button and use it to share or keep in repo
+
+ 🎯 Step 9: Once completed development work, To stop n8n-mcp running within Docker Desktop from the command line:
   
 docker stop n8n-mcp
   
- 🎯 step 10: stop docker
+ 🎯 step 10: to stop docker
 
 docker desktop stop
   
