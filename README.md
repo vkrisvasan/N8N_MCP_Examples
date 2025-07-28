@@ -46,10 +46,10 @@ docker run -it --rm \
 
  🎯 step 7: create workflow in n8n http://localhost:5678 by "Create Workflow" > "Import from file" and import the json generated from cursor IDE. Save the flow and continue to mature the flow by running it and changiung it. Refer AutomatedBacklogRefinement branch within the repo for details of BacklogRefinementAutomation.json file, n8n-mcp.mdc file,  mcp.json file and the screen shots of the uI config. 
 
- 🎯 step 8: install https://sqlitebrowser.org/dl/ and use it to connect to the ~/n8n_data/database.sqlite and understand the config data
+ 🎯 step 8: download the workflow as a json file hitting the 3 dots near the save button and use it to share or keep in repo - BacklogRefinementAutomation.json
 
- 🎯 step 8.1: download the workflow as a json file hitting the 3 dots near the save button and use it to share or keep in repo - BacklogRefinementAutomation.json
-
+ 🎯 step 8.1: install https://sqlitebrowser.org/dl/ and use it to connect to the ~/n8n_data/database.sqlite and understand the config data
+ 
  🎯 Step 9: Once completed development work, To stop n8n-mcp running within Docker Desktop from the command line:
   
 docker stop n8n-mcp
