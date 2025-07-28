@@ -1,0 +1,521 @@
+{
+  "name": "BacklogRefinementAutomation",
+  "nodes": [
+    {
+      "parameters": {
+        "rule": {
+          "interval": [
+            {
+              "field": "minutes",
+              "minutesInterval": 1
+            }
+          ]
+        }
+      },
+      "type": "n8n-nodes-base.scheduleTrigger",
+      "typeVersion": 1.2,
+      "position": [
+        -5120,
+        -288
+      ],
+      "id": "75011f62-1fe3-43e9-a319-e8dfda958880",
+      "name": "Schedule Trigger"
+    },
+    {
+      "parameters": {
+        "authentication": "serviceAccount",
+        "documentId": {
+          "__rl": true,
+          "value": "1lFfLDhoufEGfVqYTDx59ufIrE7HCbI5YA6WJ4MR_md8",
+          "mode": "id"
+        },
+        "sheetName": {
+          "__rl": true,
+          "value": 411639268,
+          "mode": "list",
+          "cachedResultName": "HumanEntry",
+          "cachedResultUrl": "https://docs.google.com/spreadsheets/d/1lFfLDhoufEGfVqYTDx59ufIrE7HCbI5YA6WJ4MR_md8/edit#gid=411639268"
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.googleSheets",
+      "typeVersion": 4.6,
+      "position": [
+        -4912,
+        -288
+      ],
+      "id": "6a88a568-cc6a-497b-8576-deeaa210ee5e",
+      "name": "Read Requirement Sheet",
+      "credentials": {
+        "googleApi": {
+          "id": "UkkKhERneQRYckQB",
+          "name": "Google Sheets account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "conditions": {
+          "options": {
+            "caseSensitive": true,
+            "leftValue": "",
+            "typeValidation": "strict",
+            "version": 2
+          },
+          "conditions": [
+            {
+              "id": "40dda665-1934-41f7-93a5-be2c4d81bd82",
+              "leftValue": "={{ $json.SystemAltered }}",
+              "rightValue": "",
+              "operator": {
+                "type": "string",
+                "operation": "empty",
+                "singleValue": true
+              }
+            }
+          ],
+          "combinator": "and"
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.filter",
+      "typeVersion": 2.2,
+      "position": [
+        -4720,
+        -368
+      ],
+      "id": "14ed87b0-533d-4fca-a564-bef491aa4b5a",
+      "name": "Filter new records"
+    },
+    {
+      "parameters": {
+        "promptType": "define",
+        "text": "=You are an expert requirements analyst. You follow industry leading agile playbook and engineering playbook \n\nGiven this story:\nStory ID: {{$json[\"StoryID\"]}}\nStory: {{$json[\"Story\"]}}\nCurrent DoR: {{$json[\"DoR\"]}}\nCurrent DoD: {{$json[\"DoD\"]}}\nCurrent Acceptance Criteria: {{$json[\"AcceptanceCriteria\"]}}\nCurrent Functional Specs: {{$json[\"FunctionalSpecs\"]}}\nCurrent Non-Functional Specs: {{$json[\"NonFunctionalSpecs\"]}}\nCurrent Story Points: {{$json[\"StoryPoints\"]}}\n\nPlease generate improved, much more detailed and clear versions of the following fields: Story, DoR, DoD, Acceptance Criteria, Functional Specs, Non-Functional Specs, and Story Points.\n\nFor the output, return each of these fields as its own JSON object in the format:\n\n{\"StoryID\": \"STORY-008”,\n\"Story\": \"Reporting dashboard”,,\n\"DoR\": \"Elaborated DoR text goes here…”,\n\"DoD\": \"Elaborated DoD text goes here…”,\n\"AcceptanceCriteria\": \"Elaborated Acceptance Criteria…”,\n\"FunctionalSpecs\": \"Elaborated Functional Specs…”,\n\"NonFunctionalSpecs\": \"Elaborated Non-Functional Specs…”,\n\"StoryPoints\": 8}\n\nDo NOT include any explanation, headings, greetings, or anything else.",
+        "options": {}
+      },
+      "type": "@n8n/n8n-nodes-langchain.agent",
+      "typeVersion": 2.1,
+      "position": [
+        -4544,
+        -304
+      ],
+      "id": "7d1bb37e-0538-44a4-8070-36c33c45a77e",
+      "name": "Backlog Refinement Agent",
+      "alwaysOutputData": true
+    },
+    {
+      "parameters": {
+        "model": "llama3-70b-8192",
+        "options": {}
+      },
+      "type": "@n8n/n8n-nodes-langchain.lmChatGroq",
+      "typeVersion": 1,
+      "position": [
+        -4592,
+        -128
+      ],
+      "id": "407136d3-cd58-48a7-96a8-329e2f3e12c5",
+      "name": "LLM Meta llama3-70b thru Groq",
+      "credentials": {
+        "groqApi": {
+          "id": "CPbBK7Q49NzoRXum",
+          "name": "Groq account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "jsCode": "const responseText = $json[\"output\"] || \"\";\n\n// Find the first '{' or '['\nconst jsonStart = Math.min(\n  responseText.indexOf(\"{\") >= 0 ? responseText.indexOf(\"{\") : Infinity,\n  responseText.indexOf(\"[\") >= 0 ? responseText.indexOf(\"[\") : Infinity\n);\n\nif (jsonStart === Infinity) {\n  throw new Error(\"No JSON object or array found in response\");\n}\n\n// Try to find matching end - naive approach by last '}' or ']'\nconst jsonEnd = Math.max(responseText.lastIndexOf(\"}\"), responseText.lastIndexOf(\"]\"));\n\nif (jsonEnd < jsonStart) {\n  throw new Error(\"Malformed JSON boundaries in response\");\n}\n\nconst jsonString = responseText.substring(jsonStart, jsonEnd + 1);\n\n// Optionally replace single quotes with double quotes only if safe\n// but be cautious: this might corrupt valid JSON if used blindly.\n\n// Try parsing the extracted substring\ntry {\n  const parsed = JSON.parse(jsonString);\n  return [{ json: parsed }];\n} catch (e) {\n  throw new Error(\"JSON parse failed: \" + e.message + \"\\nExtracted string:\\n\" + jsonString);\n}\n"
+      },
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        -4192,
+        -304
+      ],
+      "id": "0df8d9a9-7db6-42a1-ab75-5b858cd2ba01",
+      "name": "Post Process Output to JSON format"
+    },
+    {
+      "parameters": {
+        "authentication": "serviceAccount",
+        "operation": "append",
+        "documentId": {
+          "__rl": true,
+          "value": "1lFfLDhoufEGfVqYTDx59ufIrE7HCbI5YA6WJ4MR_md8",
+          "mode": "id"
+        },
+        "sheetName": {
+          "__rl": true,
+          "value": 143033749,
+          "mode": "list",
+          "cachedResultName": "n8n-sheet",
+          "cachedResultUrl": "https://docs.google.com/spreadsheets/d/1lFfLDhoufEGfVqYTDx59ufIrE7HCbI5YA6WJ4MR_md8/edit#gid=143033749"
+        },
+        "columns": {
+          "mappingMode": "autoMapInputData",
+          "value": {},
+          "matchingColumns": [
+            "row_number"
+          ],
+          "schema": [
+            {
+              "id": "StoryID",
+              "displayName": "StoryID",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": false
+            },
+            {
+              "id": "Story",
+              "displayName": "Story",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": false
+            },
+            {
+              "id": "DoR",
+              "displayName": "DoR",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": false
+            },
+            {
+              "id": "DoD",
+              "displayName": "DoD",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": false
+            },
+            {
+              "id": "AcceptanceCriteria",
+              "displayName": "AcceptanceCriteria",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": false
+            },
+            {
+              "id": "FunctionalSpecs",
+              "displayName": "FunctionalSpecs",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": false
+            },
+            {
+              "id": "NonFunctionalSpecs",
+              "displayName": "NonFunctionalSpecs",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": false
+            },
+            {
+              "id": "StoryPoints",
+              "displayName": "StoryPoints",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": false
+            }
+          ],
+          "attemptToConvertTypes": false,
+          "convertFieldsToString": false
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.googleSheets",
+      "typeVersion": 4.6,
+      "position": [
+        -3984,
+        -304
+      ],
+      "id": "b04478ba-d28b-4bdd-88ee-2de0d0a005cf",
+      "name": "Update in Requirement sheet",
+      "alwaysOutputData": true,
+      "credentials": {
+        "googleApi": {
+          "id": "UkkKhERneQRYckQB",
+          "name": "Google Sheets account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "authentication": "serviceAccount",
+        "operation": "update",
+        "documentId": {
+          "__rl": true,
+          "value": "1lFfLDhoufEGfVqYTDx59ufIrE7HCbI5YA6WJ4MR_md8",
+          "mode": "id"
+        },
+        "sheetName": {
+          "__rl": true,
+          "value": 411639268,
+          "mode": "list",
+          "cachedResultName": "HumanEntry",
+          "cachedResultUrl": "https://docs.google.com/spreadsheets/d/1lFfLDhoufEGfVqYTDx59ufIrE7HCbI5YA6WJ4MR_md8/edit#gid=411639268"
+        },
+        "columns": {
+          "mappingMode": "defineBelow",
+          "value": {
+            "StoryID": "={{ $json.StoryID }}",
+            "SystemAltered": "SystemRead_and_Elaborated"
+          },
+          "matchingColumns": [
+            "StoryID"
+          ],
+          "schema": [
+            {
+              "id": "StoryID",
+              "displayName": "StoryID",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": false
+            },
+            {
+              "id": "Story",
+              "displayName": "Story",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": true
+            },
+            {
+              "id": "DoR",
+              "displayName": "DoR",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": true
+            },
+            {
+              "id": "DoD",
+              "displayName": "DoD",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": true
+            },
+            {
+              "id": "AcceptanceCriteria",
+              "displayName": "AcceptanceCriteria",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": true
+            },
+            {
+              "id": "FunctionalSpecs",
+              "displayName": "FunctionalSpecs",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": true
+            },
+            {
+              "id": "NonFunctionalSpecs",
+              "displayName": "NonFunctionalSpecs",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": true
+            },
+            {
+              "id": "StoryPoints",
+              "displayName": "StoryPoints",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": true
+            },
+            {
+              "id": "SystemAltered",
+              "displayName": "SystemAltered",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "row_number",
+              "displayName": "row_number",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "number",
+              "canBeUsedToMatch": true,
+              "readOnly": true,
+              "removed": true
+            }
+          ],
+          "attemptToConvertTypes": false,
+          "convertFieldsToString": false
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.googleSheets",
+      "typeVersion": 4.6,
+      "position": [
+        -3984,
+        -80
+      ],
+      "id": "3271999b-8f84-4d75-8610-ddbda464f004",
+      "name": "Mark Requirement as processed in sheet",
+      "credentials": {
+        "googleApi": {
+          "id": "UkkKhERneQRYckQB",
+          "name": "Google Sheets account"
+        }
+      }
+    }
+  ],
+  "pinData": {},
+  "connections": {
+    "Schedule Trigger": {
+      "main": [
+        [
+          {
+            "node": "Read Requirement Sheet",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Read Requirement Sheet": {
+      "main": [
+        [
+          {
+            "node": "Filter new records",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Filter new records": {
+      "main": [
+        [
+          {
+            "node": "Backlog Refinement Agent",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Backlog Refinement Agent": {
+      "main": [
+        [
+          {
+            "node": "Post Process Output to JSON format",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "LLM Meta llama3-70b thru Groq": {
+      "ai_languageModel": [
+        [
+          {
+            "node": "Backlog Refinement Agent",
+            "type": "ai_languageModel",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Post Process Output to JSON format": {
+      "main": [
+        [
+          {
+            "node": "Update in Requirement sheet",
+            "type": "main",
+            "index": 0
+          },
+          {
+            "node": "Mark Requirement as processed in sheet",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Mark Requirement as processed in sheet": {
+      "main": [
+        []
+      ]
+    }
+  },
+  "active": true,
+  "settings": {
+    "executionOrder": "v1"
+  },
+  "versionId": "ec4e48db-edfc-4096-8aa6-315a2d63b8a5",
+  "meta": {
+    "templateCredsSetupCompleted": true,
+    "instanceId": "ae95f89f5ad4180303a4a0c55495f6600373b3623b111ddaba1ffe61d42645f0"
+  },
+  "id": "OGHowjPMYKbShaE3",
+  "tags": [
+    {
+      "createdAt": "2025-07-26T11:01:38.150Z",
+      "updatedAt": "2025-07-26T11:01:38.150Z",
+      "id": "5UPTD3UiaKAyoWIi",
+      "name": "Business Requirements"
+    },
+    {
+      "createdAt": "2025-07-26T11:01:38.211Z",
+      "updatedAt": "2025-07-26T11:01:38.211Z",
+      "id": "7u4TBaPf5PpZP8bS",
+      "name": "Groq + Llama 70B"
+    },
+    {
+      "createdAt": "2025-07-26T11:01:37.942Z",
+      "updatedAt": "2025-07-26T11:01:37.942Z",
+      "id": "FUZBIJgHaQKYWkQt",
+      "name": "AI Enhancement"
+    }
+  ]
+}
