@@ -125,7 +125,8 @@
     },
     {
       "parameters": {
-        "jsCode": "const responseText = $json[\"output\"] || \"\";\n\n// Find the first '{' or '['\nconst jsonStart = Math.min(\n  responseText.indexOf(\"{\") >= 0 ? responseText.indexOf(\"{\") : Infinity,\n  responseText.indexOf(\"[\") >= 0 ? responseText.indexOf(\"[\") : Infinity\n);\n\nif (jsonStart === Infinity) {\n  throw new Error(\"No JSON object or array found in response\");\n}\n\n// Try to find matching end - naive approach by last '}' or ']'\nconst jsonEnd = Math.max(responseText.lastIndexOf(\"}\"), responseText.lastIndexOf(\"]\"));\n\nif (jsonEnd < jsonStart) {\n  throw new Error(\"Malformed JSON boundaries in response\");\n}\n\nconst jsonString = responseText.substring(jsonStart, jsonEnd + 1);\n\n// Optionally replace single quotes with double quotes only if safe\n// but be cautious: this might corrupt valid JSON if used blindly.\n\n// Try parsing the extracted substring\ntry {\n  const parsed = JSON.parse(jsonString);\n  return [{ json: parsed }];\n} catch (e) {\n  throw new Error(\"JSON parse failed: \" + e.message + \"\\nExtracted string:\\n\" + jsonString);\n}\n"
+        "mode": "runOnceForEachItem",
+        "jsCode": "// This code runs once for each input item\n\nconst responseText = $json[\"output\"] || \"\";\n\n// If the AI response is already JSON for each row, parse it if needed.\n// If it's already an object, just pass through or do transformation as needed.\n\nlet result;\n\n// If \"output\" is a JSON string, parse it.\n// Otherwise, assume it's ready to use.\nif (typeof responseText === \"string\") {\n  try {\n    result = JSON.parse(responseText);\n  } catch (e) {\n    throw new Error(\"Failed to parse output as JSON: \" + responseText);\n  }\n} else {\n  result = responseText;\n}\n\n// Optional: do any more processing here\n\nreturn {\n  json: result\n};\n"
       },
       "type": "n8n-nodes-base.code",
       "typeVersion": 2,
@@ -488,11 +489,11 @@
       ]
     }
   },
-  "active": true,
+  "active": false,
   "settings": {
     "executionOrder": "v1"
   },
-  "versionId": "ec4e48db-edfc-4096-8aa6-315a2d63b8a5",
+  "versionId": "69cb5017-5abd-4889-b214-b720042fc4c1",
   "meta": {
     "templateCredsSetupCompleted": true,
     "instanceId": "ae95f89f5ad4180303a4a0c55495f6600373b3623b111ddaba1ffe61d42645f0"
